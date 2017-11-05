@@ -1,8 +1,13 @@
 ﻿[
   {
     "category": "tools",
-    "id": "match_box",
-    "name": "Box of matches",
-    "description":  "A box of matches. Good for lighting fires or torches."
+    "id": "matchbox",
+    "name": "Matchbox",
+    "alternativeTerms": [ "matches", "match_box" ],
+    "description": "A box of matches. Good for lighting fires or torches.",
+    "equippedMessage": "You ready the box of matches in your hand. Are you going to start a fire?",
+    "uses": 10,
+    "canTake": true,
+    "actionsAvailable":  ["light"] 
   }
 ]

@@ -1,38 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Resources;
-using ttocskcajBot.Commands.Controllers;
-using static ttocskcajBot.Commands.Command;
+using ttocskcajBot.Commands.Middleware;
+using ttocskcajBot.Exceptions;
 
 namespace ttocskcajBot.Commands
 {
     internal class Router
     {
-        private Dictionary<List<string>, IController> routes;
+        private Dictionary<string, RouteAction> Routes { get; }
 
-        private static readonly Lazy<Router> lazy = new Lazy<Router>(() => new Router());
-        public static Router Instance { get { return lazy.Value; } }
+        private static readonly Lazy<Router> Lazy = new Lazy<Router>(() => new Router());
+        public static Router Instance => Lazy.Value;
 
         public Router()
         {
-            routes = new Dictionary<List<string>, IController>() {
-                {  new List<string>(){ "new", "help" }, new GameController() },
-                {  new List<string>(){ "inspect" }, new AreaController() }
-
-            };
+            Routes = new Dictionary<string, RouteAction>();
         }
-        internal IController GetCommandController(Command command)
+
+        internal static CommandResponse Route(Command command)
         {
-            try
+            if (!Instance.Routes.ContainsKey(command.Verb))
+                throw new CommandException("Command doesn't exist! Check out ```.help```");
+
+            // Run each middleware before method.
+            if (Instance.Routes[command.Verb].Middleware != null)
             {
-                return routes.Where(x => x.Key.Contains(command.Verb)).First().Value;
-            }
-            catch (InvalidOperationException)
-            {
-                throw new CommandException(Properties.Resources.ResourceManager.GetString("commandNotFound"));
+                foreach (IMiddleware mw in Instance.Routes[command.Verb].Middleware)
+                {
+                    mw.Before(command);
+                }
             }
 
+            // Exeucte the commands action.
+            CommandResponse response = Instance.Routes[command.Verb].Action(command);
+
+            // Run each middleware after method.
+            if (Instance.Routes[command.Verb].Middleware != null)
+            {
+                foreach (IMiddleware mw in Instance.Routes[command.Verb].Middleware)
+                {
+                    mw.After(command);
+                }
+            }
+
+            return response;
+        }
+
+        internal static void AddRoute(string commandVerb, RouteAction routeAction)
+        {
+            Instance.Routes.Add(commandVerb, routeAction);
         }
     }
 }

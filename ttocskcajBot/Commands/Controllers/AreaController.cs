@@ -1,34 +1,30 @@
-﻿using ttocskcajBot.Commands.Controllers;
+﻿using System.Diagnostics;
 using ttocskcajBot.Entities;
+using ttocskcajBot.Entities.Things;
 using ttocskcajBot.Exceptions;
-using static ttocskcajBot.Commands.Command;
 
-namespace ttocskcajBot.Commands
+namespace ttocskcajBot.Commands.Controllers
 {
-    internal class AreaController : IController
+    /// <summary>
+    /// Runs commands that have to do with Areas
+    /// </summary>;
+    internal class AreaController
     {
-        public string RunCommand(Command command)
+        internal static CommandResponse Inspect(Command command)
         {
-            if (Game.Instance.IsRunning())
+            // Try and get an Area entity from the command.
+            if (command.Entity == null) throw new EntityNotFoundException("Please enter an entity to inspect!");
+            Area area = (Area)Game.Instance.FindEntity(command.Entity, "Area");
+
+            // Set each Thing in the area to discovered.
+            foreach (Thing thing in area.Things)
             {
-                if (command.Verb.Equals("inspect"))
-                {
-                    try
-                    {
-                        if (command.Entity == null) throw new EntityNotFoundException("Please enter an entity to inspect!");
-                        Area area = (Area)Game.Instance.FindEntity(command.Entity);
-                        return area.Description;
-                    }
-                    catch (EntityNotFoundException ex)
-                    {
-                        return ex.Message;
-                    }
-                }
-                throw new CommandException(Properties.Resources.ResourceManager.GetString("commandNotFound"));
+                thing.Discovered = true;
             }
-            throw new GameNotRunningException(Properties.Resources.ResourceManager.GetString("gameNotRunning"));
+            Debug.WriteLine($"Inspected area: {area.Name} in room: {Game.Instance.CurrentRoom.Name}");
+            Debug.WriteLine($"\tResponse: {area.Description}");
 
+            return new CommandResponse(area.Description);
         }
-
     }
 }

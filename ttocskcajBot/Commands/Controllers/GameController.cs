@@ -1,25 +1,18 @@
 ﻿using System.IO;
-using ttocskcajBot.Commands.Controllers;
-using ttocskcajBot.Exceptions;
-using static ttocskcajBot.Commands.Command;
 
-namespace ttocskcajBot.Commands
+namespace ttocskcajBot.Commands.Controllers
 {
     internal class GameController : IController
     {
-        public string RunCommand(Command command)
+        public static CommandResponse New(Command command)
         {
-
-            if (command.Verb.Equals("new"))
-            {
-                Game.Instance.NewGame();
-                return Game.Instance.CurrentRoom.Description;
-            }
-            if (command.Verb.Equals("help"))
-            {
-                return File.ReadAllText("GameData/Help.txt");
-            }
-            throw new CommandException(Properties.Resources.ResourceManager.GetString("commandNotFound"));
+            Game.Instance.NewGame();
+            //return Game.Instance.CurrentRoom.GetCurrentDescription();
+            return new CommandResponse(Game.Instance.CurrentRoom.GetCurrentDescription());
+        }
+        public static CommandResponse Help(Command command)
+        {
+            return new CommandResponse(File.ReadAllText("GameData/Help.txt"));
         }
 
     }

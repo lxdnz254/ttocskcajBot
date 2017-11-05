@@ -48,20 +48,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\CommandResponse.cs" />
+    <Compile Include="Commands\Controllers\InventoryController.cs" />
+    <Compile Include="Commands\Controllers\ThingController.cs" />
     <Compile Include="Commands\Controllers\IController.cs" />
     <Compile Include="Commands\Controllers\GameController.cs" />
     <Compile Include="Commands\Controllers\AreaController.cs" />
     <Compile Include="Commands\Controllers\RoomController.cs" />
+    <Compile Include="Commands\Middleware\GameRunningMiddleware.cs" />
+    <Compile Include="Commands\Middleware\IMiddleware.cs" />
+    <Compile Include="Commands\RouteAction.cs" />
     <Compile Include="Commands\Router.cs" />
+    <Compile Include="Entities\Description.cs" />
     <Compile Include="Entities\Area.cs" />
     <Compile Include="Entities\IEntity.cs" />
     <Compile Include="Entities\Portal.cs" />
     <Compile Include="Entities\Room.cs" />
-    <Compile Include="Entities\Thing.cs" />
+    <Compile Include="Entities\Things\Weapon.cs" />
+    <Compile Include="Entities\Things\Furniture.cs" />
+    <Compile Include="Entities\Things\Thing.cs" />
+    <Compile Include="Entities\Things\ThingReferenceResolver.cs" />
+    <Compile Include="Entities\Things\Armour.cs" />
+    <Compile Include="Entities\Things\Tool.cs" />
     <Compile Include="Exceptions\EntityExceptions.cs" />
+    <Compile Include="Exceptions\CommandException.cs" />
     <Compile Include="Exceptions\GameExceptions.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="Inventory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -72,10 +87,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="GameData\Things\Clothes.json">
+    <None Include="GameData\Things\Armours.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="GameData\Things\Misc.json">
+    <None Include="GameData\Things\Furniture.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="GameData\Things\Tools.json">

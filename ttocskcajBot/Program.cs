@@ -1,52 +1,83 @@
 ﻿using System;
-using DSharpPlus;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using DSharpPlus;
 using ttocskcajBot.Commands;
-using static ttocskcajBot.Commands.Command;
+using ttocskcajBot.Commands.Controllers;
+using ttocskcajBot.Commands.Middleware;
 
 namespace ttocskcajBot
 {
-    class Program
+    internal class Program
     {
-        static DiscordClient discord;
-        private static Game game;
+        private static DiscordClient _discord;
 
         internal Router Router { get; set; }
-        static void Main(string[] args)
+
+        private static void Main()
         {
-            MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
+            MainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
-        static async Task MainAsync(string[] args)
+
+        private static async Task MainAsync()
         {
-            discord = new DiscordClient(new DiscordConfiguration
+            _discord = new DiscordClient(new DiscordConfiguration
             {
                 Token = "MzY2ODcwMjYxNzk2MTc1ODc1.DLzKLQ.oq9i7LxSWhAFMufTBiqZlWS_oUQ",
                 TokenType = TokenType.Bot
             });
 
-            game = Game.Instance;
+            SetupRoutes();
 
-            discord.MessageCreated += async e =>
+            _discord.MessageCreated += async e =>
             {
-                if (e.Message.Content.StartsWith(">"))
+                if (e.Message.Content.StartsWith("."))
                 {
                     try
                     {
-                        string response = Command.ParseMessage(e.Message).Exec();
-                        await e.Message.RespondAsync(response);
+                        Command command = Command.ParseMessage(e.Message);
+                        CommandResponse response = Router.Route(command);
+                        await e.Message.RespondAsync(response.MessageResponse);
+
                     }
                     catch (Exception ex)
                     {
+                        Debug.WriteLine(ex.Message);
+                        Debug.WriteLine(ex.StackTrace);
                         await e.Message.RespondAsync(ex.Message);
                     }
                 }
             };
 
-            await discord.ConnectAsync();
+            await _discord.ConnectAsync();
             await Task.Delay(-1);
 
         }
 
+        private static void SetupRoutes()
+        {
+            // Game control routes
+            Router.AddRoute("new", new RouteAction(GameController.New));
+            Router.AddRoute("help", new RouteAction(GameController.Help));
+
+            // Room/Portal routes
+            Router.AddRoute("room", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, RoomController.Room));
+            Router.AddRoute("enter", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, PortalController.Enter));
+
+
+            // Area routes
+            Router.AddRoute("inspect", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, AreaController.Inspect));
+
+            // Thing interaction routes
+            Router.AddRoute("take", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, ThingController.Take));
+            Router.AddRoute("light", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, ThingController.Action));
+            Router.AddRoute("open", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, ThingController.Action));
+
+
+            // Inventory routes.
+            Router.AddRoute("inventory", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, InventoryController.Inventory));
+            Router.AddRoute("drop", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, InventoryController.Drop));
+            Router.AddRoute("equip", new RouteAction(new IMiddleware[] { new GameRunningMiddleware() }, InventoryController.Equip));
+        }
     }
 }

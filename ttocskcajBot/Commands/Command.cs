@@ -1,29 +1,24 @@
-﻿using DSharpPlus.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ttocskcajBot.Commands.Controllers;
-using ttocskcajBot.Entities;
+﻿using System;
+using System.Diagnostics;
+using DSharpPlus.Entities;
+using ttocskcajBot.Exceptions;
 
 namespace ttocskcajBot.Commands
 {
-    class Command
+    internal class Command
     {
         public string Verb { get; set; }
         public string Entity { get; set; }
+        public DiscordMessage DiscordMessage { get; set; }
 
-        public Command()
+        internal static Command ParseMessage(DiscordMessage discordMessage)
         {
-        }
+            Debug.WriteLine($"Player issued command: <{discordMessage.Author.Username}> {discordMessage.Content}");
 
-        internal static Command ParseMessage(DiscordMessage message)
-        {
-            Console.WriteLine(String.Format("Player command: <{0}> {1}", message.Author.Username, message.Content));
-
-            string commandString = message.Content.TrimStart('>');
+            string commandString = discordMessage.Content.TrimStart('.');
             string[] parts = commandString.Split(new[] { ' ' }, 2);
 
-            Command command = new Command();
+            Command command = new Command {DiscordMessage = discordMessage};
             switch (parts.Length)
             {
                 case 0:
@@ -41,28 +36,12 @@ namespace ttocskcajBot.Commands
 
             return command;
         }
-        internal string Exec()
-        {
-            IController controller = Router.Instance.GetCommandController(this);
 
-            return controller.RunCommand(this);
-        }
+    }
 
-        [Serializable]
-        internal class CommandException : Exception
-        {
-            public CommandException()
-            {
-            }
-
-            public CommandException(string message) : base(message)
-            {
-            }
-
-            public CommandException(string message, Exception innerException) : base(message, innerException)
-            {
-            }
-        }
+    internal class CommandEventArgs
+    {
+        public Command Command { get; set; }
     }
 }
 

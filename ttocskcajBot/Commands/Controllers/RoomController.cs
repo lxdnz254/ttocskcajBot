@@ -1,23 +1,23 @@
-﻿using ttocskcajBot.Commands.Controllers;
-using ttocskcajBot.Exceptions;
-using static ttocskcajBot.Commands.Command;
+﻿using ttocskcajBot.Exceptions;
+using ttocskcajBot.Properties;
 
-namespace ttocskcajBot.Commands
+namespace ttocskcajBot.Commands.Controllers
 {
     internal class RoomController : IController
     {
         public string RunCommand(Command command)
         {
-            if (Game.Instance.IsRunning())
+            if (command.Verb.Equals("move"))
             {
-                if (command.Verb.Equals("move"))
-                {
-                    return "What direction?";
-                }
-                throw new CommandException(Properties.Resources.ResourceManager.GetString("commandNotFound"));
+                return "What direction?";
             }
-            throw new GameNotRunningException(Properties.Resources.ResourceManager.GetString("gameNotRunning"));
+            throw new CommandException(Resources.ResourceManager.GetString("commandNotFound"));
+
         }
 
+        public static CommandResponse Room(Command command)
+        {
+            return new CommandResponse(Game.Instance.CurrentRoom.GetCurrentDescription());
+        }
     }
 }
